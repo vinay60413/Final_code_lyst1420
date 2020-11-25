@@ -8,6 +8,8 @@ class MenuItems(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=200,blank=True, null=True)
     price = models.CharField(max_length=50)
+    Veg = models.BooleanField(default=True, blank=True)
+    category = models.CharField(max_length=50, default='Recommended', blank=True)
     stock = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True, blank=True)
     image = models.ImageField(upload_to='images/', blank=True, null=True)

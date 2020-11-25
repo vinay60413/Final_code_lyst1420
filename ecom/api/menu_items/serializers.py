@@ -10,4 +10,4 @@ class MenuItemsSerializers(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MenuItems
         #uncomment category if requeired
-        fields = ('id', 'name', 'description', 'price', 'image', 'product','review_stars', 'review_counts')
+        fields = ('id', 'name', 'description', 'price','veg','category', 'image', 'product','review_stars', 'review_counts')

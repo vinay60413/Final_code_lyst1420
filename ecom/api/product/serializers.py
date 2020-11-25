@@ -9,5 +9,6 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Product
-        #uncomment category if requeired
-        fields = ('id', 'name', 'description', 'price', 'image', 'category','review_stars', 'review_counts')
+        # uncomment category if requeired
+        fields = ('id', 'name', 'description', 'price', 'discountInfo',
+                  'image', 'category', 'review_stars', 'review_counts', 'location')

@@ -18,10 +18,16 @@ def getMenuItems(request, id):
     if request.method == "GET":
         product = Product.objects.get(id=id)
         queryset = MenuItems.objects.filter(product=product).values()
+        returnDict = {}
         li = []
+        category = []
         for item in queryset:
             li.append(item)
-        return JsonResponse({'data':li})
+            if item['category'] not in category:
+                category.append({'title':item['category'],'active':True})
+        returnDict['data'] = li 
+        returnDict['category'] = category
+        return JsonResponse(returnDict,safe=False)
     return JsonResponse({'Err':'GET method required'})
 
 class MenuItemsViewSet(viewsets.ModelViewSet):

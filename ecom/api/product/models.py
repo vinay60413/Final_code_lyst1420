@@ -3,7 +3,7 @@ from api.category.models import Category
 from django.core.validators import MaxValueValidator
 # Create your models here.
 
-
+# Restaurant or store details
 class Product(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=100)

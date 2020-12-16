@@ -1,11 +1,13 @@
 from rest_framework import viewsets
 from .serializers import MenuItemsSerializers
 from .models import MenuItems
+from ..discountDetails.models import DiscountDetails
 from ..product.models import Product
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
+import os, sys
 
 class LazyEncoder(DjangoJSONEncoder):
     def default(self, obj):
@@ -15,20 +17,55 @@ class LazyEncoder(DjangoJSONEncoder):
 
 @csrf_exempt
 def getMenuItems(request, id):
-    if request.method == "GET":
-        product = Product.objects.get(id=id)
-        queryset = MenuItems.objects.filter(product=product).values()
-        returnDict = {}
-        li = []
-        category = []
-        for item in queryset:
-            li.append(item)
-            if item['category'] not in category:
-                category.append({'title':item['category'],'active':True})
-        returnDict['data'] = li 
-        returnDict['category'] = category
-        return JsonResponse(returnDict,safe=False)
-    return JsonResponse({'Err':'GET method required'})
+    try:
+        if request.method == "GET":
+            returnDict = {}
+            product = Product.objects.get(id=id)
+            queryset = MenuItems.objects.filter(product=product).values()
+            # Discount Info extractor
+            discountInfoNameLi = []
+            for val in Product.objects.filter(id=id).values():
+                discountInfoNameLi = val['discountInfo'].split(',')
+            discountDict = []
+            for coupon in discountInfoNameLi:
+                for val in DiscountDetails.objects.filter(couponName=coupon).values():
+                    discountDict.append(val)
+            returnDict['discountInfo'] =  discountDict
+            # Discount Info Ends
+
+            # Category data maker
+            li = []
+            category = []
+            categoryInd = []
+            for item in queryset:
+                li.append(item)
+                if item['category'] not in categoryInd:
+                    categoryInd.append(item['category'])
+                    category.append({'title':item['category'],'active':True})
+            returnDict['data'] = li 
+            temp = []
+            setFlag = 0
+            ind = 0
+            setInd = 0
+            ### Poping recommended category to the top
+            for item in  category:
+                if 'Recommended' == item['title']:
+                    temp = category[0]
+                    category[0] = item
+                    setFlag = 1
+                    setInd = ind
+                ind+=1
+            if setFlag == 1:
+                category[setInd] = temp
+            
+            returnDict['category'] = category
+            ### Category adder ends
+
+            return JsonResponse(returnDict,safe=False)
+        return JsonResponse({'Err':'GET method required'})
+    except:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        print('Exception at build_alert \nline:',exc_tb.tb_lineno,'\nException:',exc_obj,'\ntype:', exc_type)
 
 class MenuItemsViewSet(viewsets.ModelViewSet):
     queryset = MenuItems.objects.all().order_by('id')

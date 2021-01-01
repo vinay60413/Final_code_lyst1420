@@ -17,15 +17,16 @@ class LazyEncoder(DjangoJSONEncoder):
 
 @csrf_exempt
 def getMenuItems(request, id):
-    try:
-        if request.method == "GET":
+    if request.method == "GET":
+        try:
             returnDict = {}
             product = Product.objects.get(id=id)
             queryset = MenuItems.objects.filter(product=product).values()
             # Discount Info extractor
             discountInfoNameLi = []
             for val in Product.objects.filter(id=id).values():
-                discountInfoNameLi = val['discountInfo'].split(',')
+                if val['discountInfo'] != None:
+                    discountInfoNameLi = val['discountInfo'].split(',')
             discountDict = []
             for coupon in discountInfoNameLi:
                 for val in DiscountDetails.objects.filter(couponName=coupon).values():
@@ -62,10 +63,11 @@ def getMenuItems(request, id):
             ### Category adder ends
 
             return JsonResponse(returnDict,safe=False)
-        return JsonResponse({'Err':'GET method required'})
-    except:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        print('Exception at build_alert \nline:',exc_tb.tb_lineno,'\nException:',exc_obj,'\ntype:', exc_type)
+        except:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            print('Exception at build_alert \nline:',exc_tb.tb_lineno,'\nException:',exc_obj,'\ntype:', exc_type)
+            return JsonResponse({'Err':'ER02X'})
+    return JsonResponse({'Err':'GET method required'})
 
 class MenuItemsViewSet(viewsets.ModelViewSet):
     queryset = MenuItems.objects.all().order_by('id')

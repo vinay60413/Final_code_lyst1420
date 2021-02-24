@@ -16,7 +16,7 @@ class CustomUser(AbstractUser):
 
     REQUIRED_FIELDS = []
 
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True, unique=True)
 
     gender = models.CharField(max_length=10, blank=True, null=True)
 
